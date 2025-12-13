@@ -37,6 +37,7 @@ function App() {
     speed: 1.0,
     reactivity: 0.7,
     complexity: 0.5,
+    maxAmplitude: 1.0, // Add this
   });
 
   // Memoized presets to prevent recreation on every render
@@ -535,11 +536,11 @@ function App() {
             top: `${uiPosition.y}px`,
             height:
               audioFile && showControls
-                ? "340px"
+                ? "380px"
                 : audioFile && !showControls
                 ? "176px"
                 : !audioFile && showControls
-                ? "255px"
+                ? "295px"
                 : "98px",
           }}
           onMouseDown={handleMouseDown}
@@ -712,6 +713,27 @@ function App() {
                       setWaveSettings((s) => ({
                         ...s,
                         complexity: parseFloat(e.target.value),
+                      }))
+                    }
+                  />
+                </div>
+                <div className="control-item">
+                  <label>
+                    <span>Max Amplitude</span>
+                    <span className="control-value">
+                      {waveSettings.maxAmplitude.toFixed(1)}x
+                    </span>
+                  </label>
+                  <input
+                    type="range"
+                    min="0.1"
+                    max="3"
+                    step="0.1"
+                    value={waveSettings.maxAmplitude}
+                    onChange={(e) =>
+                      setWaveSettings((s) => ({
+                        ...s,
+                        maxAmplitude: parseFloat(e.target.value),
                       }))
                     }
                   />
