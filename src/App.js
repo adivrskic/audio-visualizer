@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from "react";
+import React, { useState, useCallback } from "react";
 import { useAudioPlayer } from "./hooks/useAudioPlayer";
 import { useWaveform } from "./hooks/useWaveform";
 import { useDraggable } from "./hooks/useDraggable";
@@ -13,8 +13,8 @@ import { defaultPresets } from "./utils/presets";
 import "./styles/App.scss";
 function App() {
   const deviceType = useDeviceDetection();
+  const [showPresets, setShowPresets] = useState(false);
   const [showControls, setShowControls] = useState(false);
-
   const [waveSettings, setWaveSettings] = useState({
     intensity: 0.5,
     speed: 1.0,
@@ -84,15 +84,19 @@ function App() {
   }, [cleanupAudio, resetPosition]);
 
   const getPanelHeight = () => {
-    if (!audioFile && !showControls) return "98px";
-    if (!audioFile && showControls) return "295px";
-    if (audioFile && !showControls) return "176px";
-    if (audioFile && showControls) return "380px";
+    if (!audioFile && !showControls && !showPresets) return "98px";
+    if (!audioFile && showControls && !showPresets) return "295px";
+    if (!audioFile && !showControls && showPresets) return "240px"; // Height for presets
+    if (!audioFile && showControls && showPresets) return "437px"; // Both expanded
+    if (audioFile && !showControls && !showPresets) return "176px";
+    if (audioFile && showControls && !showPresets) return "380px";
+    if (audioFile && !showControls && showPresets) return "318px"; // Audio + presets
+    if (audioFile && showControls && showPresets) return "522px"; // All expanded
     return "98px";
   };
 
   const panelHeight = getPanelHeight();
-
+  console.log(showPresets);
   return (
     <WebGLCheck>
       <ErrorBoundary
@@ -123,6 +127,8 @@ function App() {
             panelRef={containerRef}
             isExpanded={showControls}
             onToggleExpand={() => setShowControls(!showControls)}
+            onTogglePresets={() => setShowPresets(!showPresets)}
+            showPresets={showPresets}
             deviceType={deviceType}
             style={{ height: panelHeight }}
           >
@@ -137,6 +143,7 @@ function App() {
                 onPause={pause}
                 currentTime={currentTime}
                 duration={duration}
+                showPresets={showPresets}
               />
 
               <div className="status-indicator">

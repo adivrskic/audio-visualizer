@@ -1,6 +1,11 @@
-import React, { useRef } from "react";
-import { Upload, X, Play } from "lucide-react";
-import { formatFileName, formatFileSize } from "../../utils/audioUtils";
+import React, { useRef, useState } from "react";
+import { Upload, X, Play, Loader2 } from "lucide-react";
+import {
+  formatFileName,
+  formatFileSize,
+  fetchPresetAudio,
+} from "../../utils/audioUtils";
+import { presetSongs, getGenreIcon } from "../../utils/presetSongs";
 
 const AudioUploader = ({
   audioFile,
@@ -12,8 +17,10 @@ const AudioUploader = ({
   onPause,
   currentTime,
   duration,
+  showPresets,
 }) => {
   const fileInputRef = useRef(null);
+  const [loadingPreset, setLoadingPreset] = useState(null);
 
   const handleFileChange = (e) => {
     const file = e.target.files?.[0] || null;
@@ -27,6 +34,7 @@ const AudioUploader = ({
       fileInputRef.current.value = "";
     }
     onClear();
+    setLoadingPreset(null);
   };
 
   const formatTime = (seconds) => {
@@ -35,6 +43,20 @@ const AudioUploader = ({
     const secs = Math.floor(seconds % 60);
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
+
+  const handlePresetSelect = async (song) => {
+    setLoadingPreset(song.id);
+    try {
+      const file = await fetchPresetAudio(song.filename);
+      onFileSelect(file);
+    } catch (error) {
+      console.error("Failed to load preset:", error);
+    } finally {
+      setLoadingPreset(null);
+    }
+  };
+
+  console.log("show: ", showPresets);
 
   if (!audioFile) {
     return (
@@ -46,6 +68,41 @@ const AudioUploader = ({
           <Upload size={12} />
           <span>Upload Audio</span>
         </button>
+
+        {showPresets && (
+          <div className="preset-songs">
+            <div className="preset-header">
+              <span className="preset-title">BUILT-IN TRACKS</span>
+            </div>
+            <div className="preset-grid">
+              {presetSongs.map((song) => (
+                <button
+                  key={song.id}
+                  className={`preset-song-btn ${
+                    loadingPreset === song.id ? "loading" : ""
+                  }`}
+                  onClick={() => handlePresetSelect(song)}
+                  disabled={loadingPreset !== null}
+                >
+                  {loadingPreset === song.id ? (
+                    <Loader2 size={12} className="spin" />
+                  ) : (
+                    <span className="genre-icon">
+                      {getGenreIcon(song.genre)}
+                    </span>
+                  )}
+                  <div className="song-info">
+                    <span className="song-name">{song.name}</span>
+                    <span className="song-details">
+                      {song.genre} • {song.duration}
+                    </span>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         <input
           ref={fileInputRef}
           type="file"

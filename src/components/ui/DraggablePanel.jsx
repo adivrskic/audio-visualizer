@@ -1,5 +1,5 @@
 import React from "react";
-import { Waves, ChevronDown, ChevronUp } from "lucide-react";
+import { Waves, SlidersHorizontal, Music } from "lucide-react";
 
 const DraggablePanel = ({
   children,
@@ -9,6 +9,8 @@ const DraggablePanel = ({
   panelRef,
   isExpanded,
   onToggleExpand,
+  onTogglePresets,
+  showPresets,
   deviceType,
   className = "",
 }) => {
@@ -27,13 +29,30 @@ const DraggablePanel = ({
           <span className="panel-title">WAVE</span>
           <span className="device-tag">{deviceType}</span>
         </div>
-        <button
-          className="expand-toggle"
-          onClick={onToggleExpand}
-          aria-label={isExpanded ? "Collapse panel" : "Expand panel"}
-        >
-          {isExpanded ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
-        </button>
+
+        <div className="header-actions">
+          {/* Disc/Music icon for preset tracks */}
+          <button
+            className={`header-action-btn ${showPresets ? "active" : ""}`}
+            onClick={onTogglePresets}
+            aria-label="Preset tracks"
+            title="Preset tracks"
+          >
+            <Music size={12} />
+          </button>
+
+          {/* Filter icon for wave settings */}
+          <button
+            className={`expand-toggle ${isExpanded ? "active" : ""}`}
+            onClick={onToggleExpand}
+            aria-label={
+              isExpanded ? "Hide wave settings" : "Show wave settings"
+            }
+            title="Wave settings"
+          >
+            <SlidersHorizontal size={12} />
+          </button>
+        </div>
       </div>
 
       <div className="panel-body">{children}</div>

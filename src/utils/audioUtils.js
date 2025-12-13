@@ -36,3 +36,22 @@ export const validateAudioFile = (file) => {
 
   return { valid: true, error: null };
 };
+// Add to existing file
+export const fetchPresetAudio = async (filename) => {
+  try {
+    const response = await fetch(`/audio/${filename}`);
+    const blob = await response.blob();
+    const file = new File([blob], filename, { type: "audio/mpeg" });
+    return file;
+  } catch (error) {
+    console.error("Failed to fetch preset audio:", error);
+    throw error;
+  }
+};
+
+export const formatTime = (seconds) => {
+  if (!seconds || seconds === Infinity) return "0:00";
+  const mins = Math.floor(seconds / 60);
+  const secs = Math.floor(seconds % 60);
+  return `${mins}:${secs.toString().padStart(2, "0")}`;
+};
