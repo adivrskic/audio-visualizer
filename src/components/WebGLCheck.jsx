@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 
 export default function WebGLCheck({ children }) {
   const [webglSupported, setWebglSupported] = useState(true);
-  const [error, setError] = useState(null);
+  const [, setError] = useState(null);
 
   useEffect(() => {
     const checkWebGLSupport = () => {
