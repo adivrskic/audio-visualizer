@@ -100,7 +100,7 @@ export default function WaveformGrid({
 
     // Main color from devSettings or prop
     const mainColorHex = devSettings?.mainColor || color;
-    const mainColor = new THREE.Color(mainColorHex);
+    // const mainColor = new THREE.Color(mainColorHex);
 
     // Create a dense grid
     for (let z = 0; z < horizontalLines; z++) {
@@ -164,16 +164,7 @@ export default function WaveformGrid({
     });
 
     return { geometry, material, glowMaterial };
-  }, [
-    color,
-    opacity,
-    blurAmount,
-    devSettings,
-    horizontalLines,
-    verticalLines,
-    spacing,
-    maxDistance,
-  ]);
+  }, [color, opacity, devSettings, horizontalLines, verticalLines, spacing]);
 
   // Store initial positions
   useEffect(() => {
@@ -299,8 +290,8 @@ export default function WaveformGrid({
     const waveformLength = waveform.length;
 
     // Get the current audio intensity (average of waveform)
-    const currentIntensity =
-      waveform.reduce((sum, val) => sum + val, 0) / waveformLength;
+    // const currentIntensity =
+    //   waveform.reduce((sum, val) => sum + val, 0) / waveformLength;
 
     for (let i = 0; i < totalVertices; i++) {
       const baseIndex = i * 3;

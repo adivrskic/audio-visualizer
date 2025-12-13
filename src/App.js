@@ -10,12 +10,8 @@ import {
   X,
   Share2,
   Waves,
-  Settings,
   ChevronDown,
   ChevronUp,
-  Code,
-  Check,
-  Copy,
 } from "lucide-react";
 import html2canvas from "html2canvas";
 
@@ -26,10 +22,9 @@ function App() {
   const [isSharing, setIsSharing] = useState(false);
   const [isReady, setIsReady] = useState(false);
   const [showControls, setShowControls] = useState(false);
-  const [showDevPanel, setShowDevPanel] = useState(true);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
-  const [settingsCopied, setSettingsCopied] = useState(false);
+  const [, setSettingsCopied] = useState(false);
 
   // Draggable UI state
   const [uiPosition, setUiPosition] = useState({ x: 24, y: 24 });
@@ -138,37 +133,6 @@ function App() {
     return allSettings;
   };
 
-  // Copy settings to clipboard
-  const copySettingsToClipboard = async () => {
-    const settings = exportAllSettings();
-    try {
-      await navigator.clipboard.writeText(JSON.stringify(settings, null, 2));
-      setSettingsCopied(true);
-      setTimeout(() => setSettingsCopied(false), 2000);
-    } catch (err) {
-      console.error("Failed to copy settings:", err);
-      // Fallback for browsers without clipboard API
-      const textArea = document.createElement("textarea");
-      textArea.value = JSON.stringify(settings, null, 2);
-      document.body.appendChild(textArea);
-      textArea.select();
-      document.execCommand("copy");
-      document.body.removeChild(textArea);
-      setSettingsCopied(true);
-      setTimeout(() => setSettingsCopied(false), 2000);
-    }
-  };
-
-  // Import settings from a JSON object
-  const importSettings = (settingsObject) => {
-    if (settingsObject.waveSettings) {
-      setWaveSettings(settingsObject.waveSettings);
-    }
-    if (settingsObject.devSettings) {
-      setDevSettings(settingsObject.devSettings);
-    }
-  };
-
   // Draggable UI Handlers
   const handleMouseDown = useCallback(
     (e) => {
@@ -228,65 +192,6 @@ function App() {
       };
     }
   }, [isDragging, handleMouseMove, handleMouseUp]);
-
-  // Reset to defaults function
-  const resetToDefaults = useCallback(() => {
-    setDevSettings({
-      horizontalLines: 40,
-      verticalLines: 60,
-      spacing: 0.15,
-      baseHeightScale: 2.5,
-      centerFalloff: 0.5,
-      bassCenterFactor: 0.8,
-      highEdgeFactor: 1.2,
-      wavePropagationSpeed: 4.0,
-      rippleFrequency: 8,
-      rippleSpeed: 4,
-      organicXFrequency: 4,
-      organicZFrequency: 3,
-      organicXSpeed: 2,
-      organicZSpeed: 1.5,
-      mainColor: "#ffd700",
-      glowIntensity: 0.5,
-      glowEnabled: true,
-      cameraX: 5.7,
-      cameraY: 5,
-      cameraZ: 5,
-      cameraRotationX: -0.6,
-      cameraRotationY: 0.785,
-      cameraRotationZ: 0,
-      cameraFOV: 60,
-      mainPositionX: -5,
-      mainPositionY: 0.1,
-      mainPositionZ: -3,
-      mainRotationX: -0.3,
-      mainRotationY: 0,
-      mainRotationZ: -0.1,
-      mainScale: 1.2,
-      mirrorOpacity: 0.15,
-      mirrorBlur: 0.01,
-      mirrorScale: 1.0,
-      bloomIntensity: 0.8,
-      bloomThreshold: 0.2,
-      bloomSmoothing: 0.5,
-      vignette: 0.4,
-      noise: 0.15,
-      smoothing: 0.6,
-      fftSize: 2048,
-      dofEnabled: false,
-      focusDistance: 0.1,
-      focalLength: 0.1,
-      bokehScale: 2,
-      dofBlur: 1.0,
-    });
-
-    setWaveSettings({
-      intensity: 0.5,
-      speed: 1.0,
-      reactivity: 0.7,
-      complexity: 0.5,
-    });
-  }, []);
 
   // Cleanup function
   const cleanup = useCallback(() => {
@@ -569,8 +474,6 @@ function App() {
       }
     };
   }, [isPlaying, duration]);
-
-  console.log(currentTime, duration);
 
   return (
     <WebGLCheck>

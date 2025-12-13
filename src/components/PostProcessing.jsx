@@ -6,10 +6,9 @@ import {
 } from "@react-three/postprocessing";
 import { BlendFunction } from "postprocessing";
 import { useThree } from "@react-three/fiber";
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 
 export default function PostProcessing({ devSettings }) {
-  const { gl, scene, camera, size } = useThree();
   const composerRef = useRef();
 
   const {
