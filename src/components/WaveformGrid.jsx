@@ -99,7 +99,7 @@ export default function WaveformGrid({
     const baseGrayColor = new THREE.Color(0x666666);
 
     // Main color from devSettings or prop
-    const mainColorHex = devSettings?.mainColor || color;
+    // const mainColorHex = devSettings?.mainColor || color;
     // const mainColor = new THREE.Color(mainColorHex);
 
     // Create a dense grid
@@ -164,7 +164,7 @@ export default function WaveformGrid({
     });
 
     return { geometry, material, glowMaterial };
-  }, [color, opacity, devSettings, horizontalLines, verticalLines, spacing]);
+  }, [opacity, devSettings, horizontalLines, verticalLines, spacing]);
 
   // Store initial positions
   useEffect(() => {

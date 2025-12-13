@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import Scene from "./components/Scene";
 import WebGLCheck from "./components/WebGLCheck";
 import "./App.css";
@@ -8,29 +8,28 @@ import {
   Pause,
   Music,
   X,
-  Share2,
   Waves,
   ChevronDown,
   ChevronUp,
 } from "lucide-react";
-import html2canvas from "html2canvas";
 
 function App() {
   const [audioFile, setAudioFile] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [waveform, setWaveform] = useState(Array(100).fill(0));
-  const [isSharing, setIsSharing] = useState(false);
   const [isReady, setIsReady] = useState(false);
   const [showControls, setShowControls] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
-  const [, setSettingsCopied] = useState(false);
 
   // Draggable UI state
   const [uiPosition, setUiPosition] = useState({ x: 24, y: 24 });
   const [isDragging, setIsDragging] = useState(false);
   const dragStartRef = useRef({ x: 0, y: 0 });
   const uiRef = useRef(null);
+
+  // Device detection state
+  const [deviceType, setDeviceType] = useState("desktop");
 
   // Wave control settings
   const [waveSettings, setWaveSettings] = useState({
@@ -40,80 +39,161 @@ function App() {
     complexity: 0.5,
   });
 
+  // Memoized presets to prevent recreation on every render
+  const desktopPreset = useMemo(
+    () => ({
+      mainPositionX: -5.2,
+      mainPositionY: 1.2,
+      mainPositionZ: -2.7,
+      mainRotationX: 9.3,
+      mainRotationY: 19,
+      mainRotationZ: 12.7,
+      mainScale: 1.4,
+      mirrorPositionX: -5.9,
+      mirrorPositionY: -0.5,
+      mirrorPositionZ: -2.7,
+      mirrorRotationX: 9.3,
+      mirrorRotationY: 19,
+      mirrorRotationZ: 12.7,
+      mirrorScale: 1.4,
+      cameraX: 5.7,
+      cameraY: 5,
+      cameraZ: 5,
+      cameraFOV: 60,
+    }),
+    []
+  );
+
+  const mobilePreset = useMemo(
+    () => ({
+      mainPositionX: -0.5,
+      mainPositionY: 0.8,
+      mainPositionZ: -0.5,
+      mainRotationX: 5.3,
+      mainRotationY: 12,
+      mainRotationZ: 8.7,
+      mainScale: 1.0,
+      mirrorPositionX: -0.2,
+      mirrorPositionY: 0.4,
+      mirrorPositionZ: -0.6,
+      mirrorRotationX: 5.3,
+      mirrorRotationY: 12,
+      mirrorRotationZ: 8.7,
+      mirrorScale: 1.0,
+      cameraX: 3.7,
+      cameraY: 3,
+      cameraZ: 3,
+      cameraFOV: 75,
+    }),
+    []
+  );
+
+  // Default settings
+  const defaultSettings = useMemo(
+    () => ({
+      devSettings: {
+        horizontalLines: 50,
+        verticalLines: 90,
+        spacing: 0.1,
+        baseHeightScale: 3.5,
+        centerFalloff: 0.25,
+        bassCenterFactor: 1.2,
+        highEdgeFactor: 2,
+        wavePropagationSpeed: 2,
+        rippleFrequency: 4.5,
+        rippleSpeed: 4.8,
+        organicXFrequency: 3,
+        organicZFrequency: 2.5,
+        organicXSpeed: 2.5,
+        organicZSpeed: 1.2,
+        mainColor: "#e7f775",
+        glowIntensity: 0.25,
+        glowEnabled: true,
+        cameraX: 5.7,
+        cameraY: 5,
+        cameraZ: 5,
+        cameraRotationX: -0.6,
+        cameraRotationY: 0.785,
+        cameraRotationZ: 0,
+        cameraFOV: 60,
+        mainPositionX: -5.2,
+        mainPositionY: 1.2,
+        mainPositionZ: -2.7,
+        mainRotationX: 9.3,
+        mainRotationY: 19,
+        mainRotationZ: 12.7,
+        mainScale: 1.4,
+        mirrorPositionX: -5.9,
+        mirrorPositionY: -0.5,
+        mirrorPositionZ: -2.7,
+        mirrorRotationX: 9.3,
+        mirrorRotationY: 19,
+        mirrorRotationZ: 12.7,
+        mirrorOpacity: 0.1,
+        mirrorBlur: 0,
+        mirrorScale: 1.4,
+        bloomIntensity: 2,
+        bloomThreshold: 0.67,
+        bloomSmoothing: 0,
+        vignette: 1,
+        noise: 0.75,
+        smoothing: 0.6,
+        fftSize: 2048,
+      },
+    }),
+    []
+  );
+
   // Dev panel settings with default values
-  const [devSettings, setDevSettings] = useState({
-    // Grid settings
-    horizontalLines: 50,
-    verticalLines: 90,
-    spacing: 0.1,
+  const [devSettings, setDevSettings] = useState(defaultSettings.devSettings);
 
-    // Depth of Field settings
-    dofEnabled: true,
-    focusDistance: 1,
-    focalLength: 1,
-    bokehScale: 10,
-    dofBlur: 10,
+  // Detect device type on mount
+  useEffect(() => {
+    const detectDeviceType = () => {
+      const isMobile =
+        /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ||
+        window.innerWidth <= 768;
+      return isMobile ? "mobile" : "desktop";
+    };
 
-    // Wave settings
-    baseHeightScale: 3.5,
-    centerFalloff: 0.25,
-    bassCenterFactor: 1.2,
-    highEdgeFactor: 2,
-    wavePropagationSpeed: 2.0,
+    const detectedType = detectDeviceType();
+    setDeviceType(detectedType);
 
-    // Animation settings
-    rippleFrequency: 4.5,
-    rippleSpeed: 4.8,
-    organicXFrequency: 3,
-    organicZFrequency: 2.5,
-    organicXSpeed: 2.5,
-    organicZSpeed: 1.2,
+    // Apply appropriate preset based on device
+    if (detectedType === "mobile") {
+      setDevSettings((prev) => ({
+        ...prev,
+        ...mobilePreset,
+      }));
+    } else {
+      setDevSettings((prev) => ({
+        ...prev,
+        ...desktopPreset,
+      }));
+    }
 
-    // Color settings
-    mainColor: "#e7f775",
-    glowIntensity: 0.25,
-    glowEnabled: true,
+    // Listen for window resize to update device type
+    const handleResize = () => {
+      const newType = detectDeviceType();
+      if (newType !== deviceType) {
+        setDeviceType(newType);
+        if (newType === "mobile") {
+          setDevSettings((prev) => ({
+            ...prev,
+            ...mobilePreset,
+          }));
+        } else {
+          setDevSettings((prev) => ({
+            ...prev,
+            ...desktopPreset,
+          }));
+        }
+      }
+    };
 
-    // Camera settings
-    cameraX: 5.7,
-    cameraY: 5,
-    cameraZ: 5,
-    cameraRotationX: -0.6,
-    cameraRotationY: 0.785,
-    cameraRotationZ: 0,
-    cameraFOV: 60,
-
-    // Scene settings
-    mainPositionX: -5.2,
-    mainPositionY: 1.2,
-    mainPositionZ: -2.7,
-    mainRotationX: 9.3,
-    mainRotationY: 19,
-    mainRotationZ: 12.7,
-    mainScale: 1.4,
-
-    // Mirror settings
-    mirrorPositionX: -5.9,
-    mirrorPositionY: -0.5,
-    mirrorPositionZ: -2.7,
-    mirrorRotationX: 9.3,
-    mirrorRotationY: 19,
-    mirrorRotationZ: 12.7,
-    mirrorOpacity: 0.1,
-    mirrorBlur: 0,
-    mirrorScale: 1.4,
-
-    // Post-processing settings
-    bloomIntensity: 2,
-    bloomThreshold: 0.67,
-    bloomSmoothing: 0,
-    vignette: 1,
-    noise: 0.75,
-
-    // Audio processing
-    smoothing: 0.6,
-    fftSize: 2048,
-  });
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [deviceType, desktopPreset, mobilePreset]);
 
   const audioRef = useRef(null);
   const audioContextRef = useRef(null);
@@ -124,15 +204,6 @@ function App() {
   const objectUrlRef = useRef(null);
   const timeUpdateIntervalRef = useRef(null);
 
-  // Export all settings as a JSON object
-  const exportAllSettings = () => {
-    const allSettings = {
-      waveSettings,
-      devSettings,
-    };
-    return allSettings;
-  };
-
   // Draggable UI Handlers
   const handleMouseDown = useCallback(
     (e) => {
@@ -141,9 +212,7 @@ function App() {
         e.target.closest(".panel-minimize") ||
         e.target.closest(".upload-button") ||
         e.target.closest(".control-btn") ||
-        e.target.closest('input[type="range"]') ||
-        e.target.closest(".dev-panel") ||
-        e.target.closest(".dev-panel-toggle")
+        e.target.closest('input[type="range"]')
       ) {
         return;
       }
@@ -383,46 +452,6 @@ function App() {
     }
   }, [isPlaying, updateWaveform]);
 
-  const captureVisualization = async () => {
-    try {
-      setIsSharing(true);
-      await new Promise((resolve) => setTimeout(resolve, 100));
-
-      const canvas = await html2canvas(document.body, {
-        backgroundColor: "#0a0a0a",
-        scale: 2,
-        useCORS: true,
-        allowTaint: true,
-        logging: false,
-      });
-
-      return canvas.toDataURL("image/png");
-    } catch (error) {
-      console.error("Error capturing visualization:", error);
-      return null;
-    } finally {
-      setIsSharing(false);
-    }
-  };
-
-  const handleShare = async () => {
-    const imageUrl = await captureVisualization();
-    if (!imageUrl) {
-      alert("Failed to capture visualization");
-      return;
-    }
-
-    const link = document.createElement("a");
-    const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
-    const fileName = `waveform-${timestamp}.png`;
-
-    link.href = imageUrl;
-    link.download = fileName;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
   useEffect(() => {
     return () => {
       cleanup();
@@ -511,7 +540,7 @@ function App() {
                 ? "176px"
                 : !audioFile && showControls
                 ? "255px"
-                : "98px", // Neither audioFile nor showControls
+                : "98px",
           }}
           onMouseDown={handleMouseDown}
         >
@@ -520,6 +549,7 @@ function App() {
             <div className="drag-handle">
               <Waves size={14} />
               <span>WAVE</span>
+              <span className="device-tag">{deviceType}</span>
             </div>
             <button
               className="panel-minimize"
@@ -569,27 +599,6 @@ function App() {
                   >
                     <X size={10} />
                     <span>Clear</span>
-                  </button>
-
-                  <button
-                    className="control-btn"
-                    onClick={handleShare}
-                    disabled={isSharing}
-                  >
-                    {isSharing ? (
-                      <>
-                        <div
-                          className="status-dot active"
-                          style={{ marginRight: 6 }}
-                        />
-                        <span>Exporting...</span>
-                      </>
-                    ) : (
-                      <>
-                        <Share2 size={10} />
-                        <span>Export</span>
-                      </>
-                    )}
                   </button>
                 </div>
 

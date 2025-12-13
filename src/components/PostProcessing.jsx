@@ -5,7 +5,6 @@ import {
   Noise,
 } from "@react-three/postprocessing";
 import { BlendFunction } from "postprocessing";
-import { useThree } from "@react-three/fiber";
 import { useRef } from "react";
 
 export default function PostProcessing({ devSettings }) {

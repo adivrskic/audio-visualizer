@@ -270,7 +270,7 @@ body,
 .control-section-content {
   height: 180px;
   overflow-y: auto;
-  padding-right: 8px;
+  /* padding-right: 8px; */
 }
 
 .control-section-content::-webkit-scrollbar {
@@ -658,7 +658,7 @@ body,
 
 @media (max-width: 768px) {
   .ui-panel {
-    width: 200px;
+    width: fit-content;
     left: 12px !important;
     top: 12px !important;
   }
@@ -740,4 +740,127 @@ body,
   display: flex;
   align-items: center;
   gap: 8px;
+}
+/* Device indicator in dev panel */
+.device-indicator {
+  background: rgba(100, 200, 255, 0.2);
+  color: #64c8ff;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 9px;
+  margin-left: 6px;
+  border: 1px solid rgba(100, 200, 255, 0.3);
+}
+
+/* Device badge in toggle button */
+.device-badge {
+  background: rgba(100, 200, 255, 0.3);
+  color: #64c8ff;
+  padding: 1px 4px;
+  border-radius: 2px;
+  font-size: 9px;
+  margin-left: 4px;
+  border: 1px solid rgba(100, 200, 255, 0.4);
+}
+
+/* Device tag in main panel */
+.device-tag {
+  background: rgba(255, 215, 0, 0.1);
+  color: rgba(255, 215, 0, 0.7);
+  padding: 1px 4px;
+  border-radius: 2px;
+  font-size: 8px;
+  margin-left: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Device info section */
+.device-info {
+  background: rgba(100, 200, 255, 0.05);
+  border: 1px solid rgba(100, 200, 255, 0.1);
+  border-radius: 4px;
+  padding: 8px;
+  margin-bottom: 12px;
+}
+
+.device-info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.device-info-item:last-child {
+  margin-bottom: 0;
+}
+
+.device-label {
+  color: rgba(100, 200, 255, 0.7);
+  font-size: 10px;
+}
+
+.device-value {
+  color: #64c8ff;
+  font-size: 10px;
+  font-weight: 500;
+  background: rgba(100, 200, 255, 0.1);
+  padding: 2px 6px;
+  border-radius: 3px;
+  border: 1px solid rgba(100, 200, 255, 0.2);
+}
+
+/* Preset buttons */
+.preset-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.preset-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+}
+
+.preset-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.preset-btn:disabled:hover {
+  background: rgba(100, 200, 255, 0.1);
+  border-color: rgba(100, 200, 255, 0.3);
+}
+
+/* Reset button animation */
+@keyframes resetFlash {
+  0% {
+    background: rgba(100, 200, 255, 0.1);
+  }
+  50% {
+    background: rgba(255, 100, 100, 0.3);
+  }
+  100% {
+    background: rgba(100, 200, 255, 0.1);
+  }
+}
+
+.dev-btn.resetting {
+  animation: resetFlash 0.5s ease;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .preset-buttons {
+    grid-template-columns: 1fr;
+  }
+
+  .device-tag {
+    display: none; /* Hide on mobile to save space */
+  }
 }
