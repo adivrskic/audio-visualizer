@@ -1,0 +1,107 @@
+/* ============================================
+   RESPONSIVE BREAKPOINTS
+   ============================================ */
+
+@media (max-width: 768px) {
+  /* UI Panel */
+  .ui-panel {
+    width: fit-content;
+    left: $spacing-xl !important;
+    top: $spacing-xl !important;
+    right: $spacing-xl !important;
+    width: calc(100% - 24px) !important;
+  }
+
+  .device-tag {
+    display: none; /* Hide on mobile to save space */
+  }
+
+  /* Dev Panel */
+  .dev-panel {
+    width: 280px;
+    right: $spacing-xl;
+    top: $spacing-xl;
+  }
+
+  .dev-panel-toggle {
+    right: $spacing-xl;
+    top: $spacing-xl;
+  }
+
+  /* Preset Buttons */
+  .preset-buttons {
+    grid-template-columns: 1fr;
+  }
+
+  /* Controls */
+  .controls {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  /* Range Slider Thumbs */
+  .control-item input[type="range"],
+  .setting-slider {
+    height: 32px;
+
+    &::-webkit-slider-thumb {
+      width: 20px;
+      height: 20px;
+      margin-top: -9.5px;
+    }
+
+    &::-moz-range-thumb {
+      width: 20px;
+      height: 20px;
+    }
+
+    &:hover::-webkit-slider-thumb {
+      transform: scale(1.1);
+    }
+  }
+
+  /* Text Inputs */
+  .input-wrapper input[type="text"],
+  .input-wrapper select {
+    font-size: 16px; /* Prevent iOS zoom */
+    padding: $spacing-xl 0;
+  }
+
+  /* Panel Content */
+  .panel-content {
+    padding: $spacing-lg;
+  }
+}
+
+/* ============================================
+     ACCESSIBILITY
+     ============================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Focus styles for keyboard navigation */
+:focus-visible {
+  outline: 2px solid rgba(255, 215, 0, 0.6);
+  outline-offset: 2px;
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+  $color-primary: #ffff00;
+  $color-secondary: #ff0000;
+  $color-border: rgba(255, 255, 0, 0.8);
+}
+
+/* Dark Mode (already dark, but ensure consistency) */
+@media (prefers-color-scheme: dark) {
+  body {
+    background: #000000;
+  }
+}

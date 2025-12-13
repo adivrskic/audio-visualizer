@@ -1,0 +1,983 @@
+/* src/App.css - Complete Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #222623;
+}
+
+/* ============================================
+   APP LAYOUT
+   ============================================ */
+.app {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+/* Canvas container */
+.canvas-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+}
+
+.noise-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.02'/%3E%3C/svg%3E");
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* ============================================
+   DRAGGABLE PANEL (New Component)
+   ============================================ */
+.draggable-panel {
+  position: fixed;
+  width: 240px;
+  background: rgba(8, 8, 12, 0.95);
+  border: 1px solid rgba(255, 215, 0, 0.2);
+  border-radius: 4px;
+  z-index: 10000;
+  font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+  font-size: 11px;
+  letter-spacing: 0.5px;
+  color: #ffd700;
+  backdrop-filter: blur(4px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3),
+    inset 0 0 0 1px rgba(255, 215, 0, 0.05);
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.draggable-panel.dragging {
+  cursor: grabbing;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5),
+    inset 0 0 0 1px rgba(255, 215, 0, 0.1);
+}
+
+.draggable-handle {
+  cursor: grab;
+  user-select: none;
+}
+
+.draggable-handle:active {
+  cursor: grabbing;
+}
+
+.panel-content {
+  position: relative;
+}
+
+/* Panel Header for DraggablePanel */
+.draggable-panel .panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  background: rgba(255, 215, 0, 0.03);
+  border-bottom: 1px solid rgba(255, 215, 0, 0.1);
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.panel-title {
+  color: #ffd700;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  opacity: 0.9;
+}
+
+.expand-toggle {
+  background: none;
+  border: none;
+  color: rgba(255, 215, 0, 0.5);
+  cursor: pointer;
+  padding: 2px;
+  margin-left: 8px;
+  transition: color 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.expand-toggle:hover {
+  color: #ffd700;
+}
+
+.expand-toggle svg {
+  width: 10px;
+  height: 10px;
+}
+
+/* Panel Body */
+.panel-body {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* ============================================
+   AUDIO UPLOADER COMPONENT
+   ============================================ */
+.upload-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.audio-info {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  position: relative;
+}
+
+.file-details {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  background: rgba(255, 215, 0, 0.03);
+  border: 1px solid rgba(255, 215, 0, 0.1);
+  border-radius: 2px;
+}
+
+.file-name {
+  font-size: 10px;
+  color: rgba(255, 215, 0, 0.9);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 70%;
+}
+
+.audio-controls {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.control-btn.primary {
+  background: rgba(255, 215, 0, 0.7);
+  border: 1px solid rgba(255, 215, 0, 0.2);
+  color: #222;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 8px;
+  border-radius: 2px;
+  font-size: 9px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+.upload-button,
+.control-btn.secondary {
+  background: transparent;
+  border: 1px solid rgba(255, 215, 0, 0.2);
+  color: rgba(255, 215, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 8px;
+  border-radius: 2px;
+  font-size: 9px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.control-btn.secondary:hover {
+  background: rgba(255, 215, 0, 0.05);
+  border-color: rgba(255, 215, 0, 0.4);
+  color: #ffd700;
+}
+
+.progress-section {
+  position: absolute;
+  top: 115%;
+  left: 18%;
+}
+
+/* ============================================
+   WAVE SETTINGS PANEL
+   ============================================ */
+.wave-settings-panel {
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  transition: all 0.3s ease;
+}
+
+.wave-settings-panel.expanded {
+  max-height: 200px;
+  opacity: 1;
+  margin-top: 8px;
+}
+
+.settings-content {
+  height: 180px;
+  overflow-y: auto;
+}
+
+.settings-content::-webkit-scrollbar {
+  width: 3px;
+}
+
+.settings-content::-webkit-scrollbar-track {
+  background: rgba(255, 215, 0, 0.05);
+}
+
+.settings-content::-webkit-scrollbar-thumb {
+  background: rgba(255, 215, 0, 0.2);
+}
+
+.setting-item {
+  margin-bottom: 10px;
+}
+
+.setting-item:last-child {
+  margin-bottom: 0;
+}
+
+.setting-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+  color: rgba(255, 215, 0, 0.6);
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.setting-value {
+  color: #ffd700;
+  font-weight: 500;
+  font-size: 9px;
+}
+
+.setting-slider {
+  width: 100%;
+  height: 2px;
+  background: rgba(255, 215, 0, 0.1);
+  border-radius: 1px;
+  outline: none;
+  -webkit-appearance: none;
+}
+
+.setting-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 8px;
+  height: 8px;
+  background: #ffd700;
+  border-radius: 1px;
+  cursor: pointer;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+}
+
+.setting-slider::-moz-range-thumb {
+  width: 8px;
+  height: 8px;
+  background: #ffd700;
+  border-radius: 1px;
+  cursor: pointer;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+}
+
+/* ============================================
+   STATUS INDICATOR
+   ============================================ */
+.status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0;
+  margin-top: 2px;
+  color: rgba(255, 215, 0, 0.5);
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-dot {
+  width: 4px;
+  height: 4px;
+}
+
+.status-dot.playing {
+  background: #ffd700;
+  box-shadow: 0 0 4px rgba(255, 215, 0, 0.6);
+  animation: pulse 1.5s infinite;
+}
+
+.status-dot.idle {
+  background: rgba(255, 215, 0, 0.2);
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.1);
+  }
+}
+
+/* ============================================
+   AUDIO ERROR DISPLAY
+   ============================================ */
+.audio-error {
+  position: fixed;
+  bottom: 100px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(255, 100, 100, 0.1);
+  border: 1px solid rgba(255, 100, 100, 0.3);
+  color: #ff6464;
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-size: 10px;
+  z-index: 10001;
+  animation: slideUp 0.3s ease;
+  max-width: 80%;
+  text-align: center;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+/* ============================================
+   FILM GRAIN OVERLAY
+   ============================================ */
+.film-grain-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 2;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.05'/%3E%3C/svg%3E");
+  mix-blend-mode: overlay;
+}
+
+/* ============================================
+   WEBGL CHECK STYLES (Add these)
+   ============================================ */
+.webgl-error-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.webgl-error-content {
+  position: relative;
+  background: rgba(15, 15, 15, 0.95);
+  border: 1px solid rgba(255, 70, 70, 0.2);
+  border-radius: 12px;
+  padding: 24px;
+  max-width: 500px;
+  width: 90%;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 70, 70, 0.1);
+  pointer-events: all;
+  animation: error-appear 0.3s ease-out;
+}
+
+.webgl-error-content .error-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.webgl-error-content h2 {
+  color: #fff;
+  font-size: 18px;
+  font-weight: 500;
+  text-align: center;
+  margin-bottom: 12px;
+  letter-spacing: 0.5px;
+}
+
+.webgl-error-content .error-message {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 14px;
+  line-height: 1.5;
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.webgl-error-content .error-details {
+  margin: 16px 0;
+}
+
+.webgl-error-content .solutions-list {
+  list-style: none;
+  padding-left: 0;
+}
+
+.webgl-error-content .solutions-list li {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 13px;
+  padding: 6px 0;
+  line-height: 1.4;
+}
+
+.webgl-error-content .solutions-list li:before {
+  content: "•";
+  color: #ffd700;
+  margin-right: 8px;
+}
+
+.webgl-error-content .error-actions {
+  display: flex;
+  gap: 12px;
+  margin: 20px 0;
+}
+
+.webgl-error-content .retry-button {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: rgba(255, 107, 107, 0.15);
+  color: #ff6b6b;
+  border: 1px solid rgba(255, 107, 107, 0.3);
+}
+
+.webgl-error-content .retry-button:hover {
+  background: rgba(255, 107, 107, 0.25);
+  border-color: rgba(255, 107, 107, 0.5);
+  transform: translateY(-1px);
+}
+
+.webgl-error-content .learn-more-button {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.webgl-error-content .learn-more-button:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.webgl-error-content .browser-support {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.webgl-error-content .browser-support p {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 12px;
+  margin-bottom: 8px;
+}
+
+.webgl-error-content .browser-icons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.webgl-error-content .browser-icons span {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* ============================================
+   RESPONSIVE ADJUSTMENTS
+   ============================================ */
+@media (max-width: 768px) {
+  .draggable-panel {
+    width: calc(100% - 24px);
+    left: 12px !important;
+    top: 12px !important;
+  }
+
+  .audio-error {
+    bottom: 80px;
+    font-size: 9px;
+    padding: 6px 12px;
+  }
+
+  .webgl-error-content {
+    padding: 20px;
+    max-width: 90%;
+  }
+
+  .webgl-error-content h2 {
+    font-size: 16px;
+  }
+
+  .webgl-error-content .error-message {
+    font-size: 13px;
+  }
+
+  .webgl-error-content .solutions-list li {
+    font-size: 12px;
+  }
+}
+
+/* ============================================
+   ACCESSIBILITY
+   ============================================ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .status-dot.playing {
+    animation: none;
+  }
+}
+
+:focus-visible {
+  outline: 2px solid rgba(255, 215, 0, 0.6);
+  outline-offset: 2px;
+}
+/* ============================================
+   PROGRESS BAR - Minimal Tech/Mechanical Style
+   ============================================ */
+
+/* Progress container - Absolute positioning for file-info */
+.progress-container {
+  margin-top: 8px;
+  width: calc(100% - 50px);
+  position: absolute;
+  top: calc(50% - 7px);
+  left: 50px;
+  transform: translateY(-50%);
+}
+
+/* Main progress bar */
+.progress-bar {
+  width: 100%;
+  height: 2px;
+  background: rgba(255, 215, 0, 0.1);
+  border-radius: 1px;
+  overflow: hidden;
+  margin-bottom: 4px;
+  position: relative;
+}
+
+/* Progress fill (actual progress indicator) */
+.progress-fill {
+  height: 100%;
+  background: #ffd700;
+  transition: width 0.1s linear;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Progress fill shimmer effect */
+.progress-fill::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 215, 0, 0.4) 50%,
+    transparent 100%
+  );
+  animation: progressShimmer 2s infinite;
+}
+
+@keyframes progressShimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* Progress states */
+.progress-bar.playing .progress-fill {
+  background: #ffd700;
+  box-shadow: 0 0 8px rgba(255, 215, 0, 0.3);
+}
+
+.progress-bar.paused .progress-fill {
+  background: rgba(255, 215, 0, 0.6);
+}
+
+.progress-bar.loading .progress-fill {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 215, 0, 0.3) 0%,
+    rgba(255, 215, 0, 0.6) 50%,
+    rgba(255, 215, 0, 0.3) 100%
+  );
+}
+
+/* Time display */
+.time-display {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: rgba(255, 215, 0, 0.5);
+  font-size: 8px;
+  letter-spacing: 0.3px;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
+.time-display span {
+  transition: color 0.2s ease;
+}
+
+.time-display .current-time {
+  color: rgba(255, 215, 0, 0.9);
+  font-weight: 500;
+}
+
+.time-display .duration {
+  color: rgba(255, 215, 0, 0.3);
+}
+
+/* Progress percentage */
+.progress-percentage {
+  position: absolute;
+  right: -30px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 8px;
+  color: rgba(255, 215, 0, 0.7);
+  font-weight: 500;
+  min-width: 24px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Buffer progress */
+.buffer-progress {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background: rgba(255, 215, 0, 0.05);
+  border-radius: 1px;
+  z-index: -1;
+}
+
+/* Progress thumb (for seeking) */
+.progress-thumb {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 8px;
+  height: 8px;
+  background: #ffd700;
+  border-radius: 1px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+  box-shadow: 0 0 4px rgba(255, 215, 0, 0.8);
+  z-index: 1;
+}
+
+.progress-container:hover .progress-thumb {
+  opacity: 1;
+}
+
+/* Progress hover effects */
+.progress-container:hover .progress-bar {
+  background: rgba(255, 215, 0, 0.15);
+}
+
+.progress-container:hover .progress-fill {
+  box-shadow: 0 0 8px rgba(255, 215, 0, 0.2);
+}
+
+/* Progress in different containers */
+.status .progress-container {
+  position: relative;
+  width: 100%;
+  left: 0;
+  top: 0;
+  transform: none;
+  margin-top: 8px;
+}
+
+/* Progress variants */
+.progress-bar.compact {
+  height: 1px;
+}
+
+.progress-bar.compact .progress-fill {
+  height: 100%;
+}
+
+.progress-bar.large {
+  height: 3px;
+  border-radius: 1.5px;
+}
+
+/* Progress for loading states */
+.progress-bar.loading-indicator {
+  background: rgba(255, 215, 0, 0.05);
+  position: relative;
+  overflow: hidden;
+}
+
+.progress-bar.loading-indicator::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 215, 0, 0.1) 50%,
+    transparent 100%
+  );
+  animation: loadingScan 1.5s infinite;
+}
+
+@keyframes loadingScan {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* Progress error state */
+.progress-bar.error {
+  background: rgba(255, 100, 100, 0.1);
+}
+
+.progress-bar.error .progress-fill {
+  background: rgba(255, 100, 100, 0.6);
+}
+
+/* Progress success state */
+.progress-bar.success .progress-fill {
+  background: rgba(100, 255, 100, 0.6);
+}
+
+/* Progress in dev panel */
+.dev-panel .progress-container {
+  position: relative;
+  width: 100%;
+  left: 0;
+  top: 0;
+  transform: none;
+  margin: 8px 0;
+}
+
+.dev-panel .progress-bar {
+  background: rgba(255, 100, 100, 0.1);
+}
+
+.dev-panel .progress-fill {
+  background: rgba(255, 100, 100, 0.6);
+}
+
+.dev-panel .time-display {
+  color: rgba(255, 100, 100, 0.5);
+}
+
+.dev-panel .time-display .current-time {
+  color: rgba(255, 100, 100, 0.9);
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+  .progress-thumb {
+    width: 12px;
+    height: 12px;
+  }
+
+  .progress-container {
+    margin-top: 12px;
+  }
+
+  .progress-bar {
+    height: 3px;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .progress-fill,
+  .progress-thumb {
+    transition: none !important;
+  }
+
+  .progress-fill::after,
+  .progress-bar.loading-indicator::before {
+    animation: none !important;
+    display: none;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .progress-bar {
+    background: rgba(255, 215, 0, 0.2);
+    border: 1px solid #ffd700;
+  }
+
+  .progress-fill {
+    background: #ffd700;
+    border: 1px solid #ffd700;
+  }
+
+  .time-display .current-time {
+    color: #ffd700;
+  }
+
+  .time-display .duration {
+    color: rgba(255, 215, 0, 0.6);
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .progress-container {
+    width: calc(100% - 40px);
+    left: 40px;
+  }
+
+  .progress-percentage {
+    display: none; /* Hide percentage on small screens */
+  }
+
+  .time-display {
+    font-size: 7px;
+  }
+
+  .status .progress-container {
+    width: 100%;
+  }
+}
+
+/* Progress bar in minimized state */
+.ui-panel.minimized .progress-container,
+.ui-panel.minimized .time-display {
+  display: none;
+}
+
+/* Alternative positioning for progress bar (if not in file-info) */
+.progress-section {
+  display: flex;
+  flex-direction: column;
+  width: calc(100% - 68px);
+}
+
+.progress-section .progress-container {
+  position: relative;
+  width: 100%;
+  left: 0;
+  top: 0;
+  transform: none;
+  margin-top: 0;
+}
+
+.progress-section .time-display {
+  margin-top: 2px;
+}
+
+/* Progress with labels */
+.progress-with-label {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.progress-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: rgba(255, 215, 0, 0.6);
+  font-size: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.progress-label span:first-child {
+  color: rgba(255, 215, 0, 0.4);
+}
+
+.progress-label span:last-child {
+  color: #ffd700;
+  font-weight: 500;
+}

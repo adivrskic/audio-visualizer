@@ -1,0 +1,139 @@
+/* ============================================
+   VARIABLES & MIXINS
+   ============================================ */
+
+// Color Palette
+$color-bg: #222623;
+$color-ui-bg: rgba(8, 8, 12, 0.95);
+$color-primary: #ffd700;
+$color-secondary: #ff6464;
+$color-accent: #64c8ff;
+$color-text: #ffd700;
+$color-text-muted: rgba(255, 215, 0, 0.5);
+$color-border: rgba(255, 215, 0, 0.2);
+
+// Border & Spacing
+$border-radius-sm: 2px;
+$border-radius-md: 4px;
+$border-radius-lg: 12px;
+$spacing-xs: 2px;
+$spacing-sm: 4px;
+$spacing-md: 8px;
+$spacing-lg: 12px;
+$spacing-xl: 16px;
+$spacing-xxl: 24px;
+
+// Typography
+$font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+$font-size-xs: 8px;
+$font-size-sm: 9px;
+$font-size-md: 10px;
+$font-size-lg: 11px;
+$font-size-xl: 13px;
+$font-size-xxl: 18px;
+$letter-spacing: 0.5px;
+$letter-spacing-tight: 0.3px;
+$letter-spacing-wide: 1px;
+
+// Animation
+$transition-fast: 0.2s ease;
+$transition-normal: 0.3s ease;
+$transition-slow: 0.4s ease;
+
+// Shadows
+$shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+$shadow-md: 0 4px 16px rgba(0, 0, 0, 0.5);
+$shadow-inner: inset 0 0 0 1px rgba(255, 215, 0, 0.05);
+
+// Mixins
+@mixin text-sm {
+  font-size: $font-size-sm;
+  letter-spacing: $letter-spacing-tight;
+  text-transform: uppercase;
+}
+
+@mixin text-md {
+  font-size: $font-size-md;
+  letter-spacing: $letter-spacing;
+}
+
+@mixin text-lg {
+  font-size: $font-size-lg;
+  letter-spacing: $letter-spacing-wide;
+  text-transform: uppercase;
+}
+
+@mixin panel-base {
+  background: $color-ui-bg;
+  border: 1px solid $color-border;
+  border-radius: $border-radius-md;
+  backdrop-filter: blur(4px);
+  font-family: $font-family;
+  color: $color-text;
+}
+
+@mixin control-input {
+  width: 100%;
+  background: transparent;
+  border: 1px solid $color-border;
+  border-radius: $border-radius-sm;
+  color: $color-text;
+  font-family: $font-family;
+  transition: all $transition-fast;
+
+  &:hover:not(:disabled) {
+    border-color: rgba(255, 215, 0, 0.4);
+  }
+
+  &:focus {
+    outline: none;
+    border-color: $color-primary;
+  }
+}
+
+@mixin scrollbar {
+  &::-webkit-scrollbar {
+    width: 3px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: rgba(255, 215, 0, 0.05);
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba(255, 215, 0, 0.2);
+
+    &:hover {
+      background: rgba(255, 215, 0, 0.3);
+    }
+  }
+}
+
+/* ============================================
+   RESET & BASE STYLES
+   ============================================ */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: $color-bg;
+}
+
+// Canvas container
+.canvas-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+}

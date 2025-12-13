@@ -1,0 +1,105 @@
+/* ============================================
+   MAIN UI PANEL
+   ============================================ */
+
+.ui-panel {
+  position: fixed;
+  width: 240px;
+  z-index: 10000;
+  transition: height $transition-normal;
+  overflow: hidden;
+
+  @include panel-base;
+  box-shadow: $shadow-sm, $shadow-inner;
+
+  &.dragging {
+    cursor: grabbing;
+    box-shadow: $shadow-md, inset 0 0 0 1px rgba(255, 215, 0, 0.1);
+  }
+}
+
+/* Panel Header */
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $spacing-lg $spacing-xl;
+  background: rgba(255, 215, 0, 0.03);
+  border-bottom: 1px solid $color-border;
+  cursor: grab;
+  user-select: none;
+}
+
+.drag-handle {
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+
+  @include text-md;
+  font-weight: 500;
+  opacity: 0.9;
+
+  svg {
+    width: 10px;
+    height: 10px;
+    opacity: 0.8;
+  }
+}
+
+.drag-indicator {
+  display: flex;
+  gap: 2px;
+  margin-left: auto;
+  opacity: 0.4;
+
+  span {
+    display: block;
+    width: 2px;
+    height: 8px;
+    background: $color-primary;
+  }
+}
+
+.ui-panel.dragging .drag-indicator {
+  opacity: 0.8;
+}
+
+/* Panel Content */
+.panel-content {
+  padding: $spacing-xl;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-lg;
+}
+
+/* Expand Toggle */
+.panel-minimize,
+.expand-toggle {
+  background: none;
+  border: none;
+  color: $color-text-muted;
+  cursor: pointer;
+  padding: $spacing-xs;
+  margin-left: $spacing-md;
+  transition: color $transition-fast;
+
+  &:hover {
+    color: $color-primary;
+  }
+
+  svg {
+    width: 10px;
+    height: 10px;
+  }
+}
+
+/* Device Tag */
+.device-tag {
+  background: rgba(255, 215, 0, 0.1);
+  color: $color-text-muted;
+  padding: 1px $spacing-sm;
+  border-radius: $border-radius-sm;
+
+  @include text-sm;
+  margin-left: $spacing-md;
+}

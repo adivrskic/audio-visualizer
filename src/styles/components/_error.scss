@@ -1,0 +1,322 @@
+/* ============================================
+   ERROR STATES
+   ============================================ */
+
+/* Error Boundary */
+.error-boundary {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.error-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+}
+
+.error-container {
+  position: relative;
+  background: rgba(15, 15, 15, 0.95);
+  border: 1px solid rgba(255, 70, 70, 0.2);
+  border-radius: $border-radius-lg;
+  padding: $spacing-xxl;
+  max-width: 400px;
+  width: 90%;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 70, 70, 0.1);
+  pointer-events: all;
+  animation: error-appear 0.3s ease-out;
+}
+
+@keyframes error-appear {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.error-icon {
+  display: flex;
+  justify-content: center;
+  margin-bottom: $spacing-xl;
+
+  svg {
+    color: #ff6b6b;
+    filter: drop-shadow(0 0 8px rgba(255, 107, 107, 0.3));
+  }
+}
+
+.error-content {
+  h3 {
+    color: #fff;
+    font-size: $font-size-xxl;
+    font-weight: 500;
+    text-align: center;
+    margin-bottom: $spacing-xl;
+    letter-spacing: $letter-spacing;
+  }
+
+  p {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: $font-size-xl;
+    line-height: 1.5;
+    text-align: center;
+    margin-bottom: $spacing-xxl;
+  }
+}
+
+.error-actions {
+  display: flex;
+  gap: $spacing-xl;
+  margin-bottom: $spacing-xxl;
+}
+
+.error-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: $spacing-md;
+  padding: $spacing-lg $spacing-xl;
+  border: none;
+  border-radius: $border-radius-md;
+  font-size: $font-size-xl;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all $transition-fast;
+
+  &.primary {
+    background: rgba(255, 107, 107, 0.15);
+    color: #ff6b6b;
+    border: 1px solid rgba(255, 107, 107, 0.3);
+
+    &:hover {
+      background: rgba(255, 107, 107, 0.25);
+      border-color: rgba(255, 107, 107, 0.5);
+      transform: translateY(-1px);
+    }
+
+    &:active {
+      transform: translateY(0);
+    }
+  }
+
+  &.secondary {
+    background: rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+  }
+}
+
+.error-details {
+  margin-top: $spacing-xxl;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: $spacing-xl;
+
+  summary {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: $font-size-lg;
+    cursor: pointer;
+    user-select: none;
+    padding: $spacing-sm 0;
+    transition: color $transition-fast;
+
+    &:hover {
+      color: rgba(255, 255, 255, 0.8);
+    }
+  }
+}
+
+.error-stack {
+  margin-top: $spacing-xl;
+  padding: $spacing-xl;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: $border-radius-md;
+  overflow: auto;
+  max-height: 200px;
+
+  code {
+    color: #ff6b6b;
+    font-size: $font-size-sm;
+    white-space: pre-wrap;
+    word-break: break-all;
+  }
+
+  pre {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: $font-size-sm;
+    margin-top: $spacing-md;
+    white-space: pre-wrap;
+    word-break: break-all;
+  }
+}
+
+.error-fallback {
+  margin-top: $spacing-xxl;
+  padding-top: $spacing-xxl;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* WebGL Error - Create separate styles instead of using @extend */
+.webgl-error-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+
+  .webgl-error-content {
+    position: relative;
+    background: rgba(15, 15, 15, 0.95);
+    border: 1px solid rgba(255, 70, 70, 0.2);
+    border-radius: $border-radius-lg;
+    padding: $spacing-xxl;
+    max-width: 500px;
+    width: 90%;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 70, 70, 0.1);
+    pointer-events: all;
+    animation: error-appear 0.3s ease-out;
+  }
+
+  .error-icon {
+    font-size: 48px;
+    margin-bottom: $spacing-xl;
+  }
+
+  h2 {
+    color: #fff;
+    font-size: $font-size-xxl;
+    font-weight: 500;
+    text-align: center;
+    margin-bottom: $spacing-xl;
+    letter-spacing: $letter-spacing;
+  }
+
+  .error-message {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: $font-size-lg;
+    line-height: 1.5;
+    text-align: center;
+    margin-bottom: $spacing-xl;
+  }
+
+  .error-details {
+    margin: $spacing-xl 0;
+
+    .solutions-list {
+      list-style: none;
+      padding-left: 0;
+
+      li {
+        color: rgba(255, 255, 255, 0.6);
+        font-size: $font-size-md;
+        padding: $spacing-xs 0;
+
+        &:before {
+          content: "•";
+          color: $color-primary;
+          margin-right: $spacing-md;
+        }
+      }
+    }
+  }
+
+  .error-actions {
+    margin: $spacing-xl 0;
+
+    .retry-button {
+      // Copy the error-btn.primary styles
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: $spacing-md;
+      padding: $spacing-lg $spacing-xl;
+      border: none;
+      border-radius: $border-radius-md;
+      font-size: $font-size-xl;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all $transition-fast;
+      background: rgba(255, 107, 107, 0.15);
+      color: #ff6b6b;
+      border: 1px solid rgba(255, 107, 107, 0.3);
+
+      &:hover {
+        background: rgba(255, 107, 107, 0.25);
+        border-color: rgba(255, 107, 107, 0.5);
+        transform: translateY(-1px);
+      }
+
+      &:active {
+        transform: translateY(0);
+      }
+    }
+
+    .learn-more-button {
+      // Copy the error-btn.secondary styles
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: $spacing-md;
+      padding: $spacing-lg $spacing-xl;
+      border: none;
+      border-radius: $border-radius-md;
+      font-size: $font-size-xl;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all $transition-fast;
+      background: rgba(255, 255, 255, 0.08);
+      color: rgba(255, 255, 255, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.12);
+        border-color: rgba(255, 255, 255, 0.2);
+      }
+    }
+  }
+
+  .browser-support {
+    margin-top: $spacing-xl;
+    padding-top: $spacing-xl;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+
+    p {
+      color: rgba(255, 255, 255, 0.5);
+      font-size: $font-size-sm;
+      margin-bottom: $spacing-md;
+    }
+
+    .browser-icons {
+      display: flex;
+      gap: $spacing-md;
+      flex-wrap: wrap;
+
+      span {
+        background: rgba(255, 255, 255, 0.05);
+        padding: $spacing-xs $spacing-sm;
+        border-radius: $border-radius-sm;
+        font-size: $font-size-sm;
+        color: rgba(255, 255, 255, 0.6);
+      }
+    }
+  }
+}
