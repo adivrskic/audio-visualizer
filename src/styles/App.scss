@@ -226,7 +226,7 @@ body,
   left: 31%;
 
   @media screen and (max-width: 768px) {
-    left: 18%;
+    left: 21%;
   }
 }
 
@@ -944,7 +944,7 @@ body,
 .progress-section {
   display: flex;
   flex-direction: column;
-  width: calc(100% - 68px);
+  width: calc(100% - 64px);
 }
 
 .progress-section .progress-container {
@@ -1324,5 +1324,73 @@ body,
 
   .device-tag {
     display: none; /* Hide on mobile to save space */
+  }
+}
+// Add these styles to your existing App.scss
+.progress-section {
+  &:hover {
+    .progress-knob {
+      opacity: 1 !important;
+    }
+  }
+}
+
+// .progress-bar {
+//   position: relative;
+//   height: 4px;
+//   background: rgba(255, 255, 255, 0.1);
+//   border-radius: 2px;
+//   overflow: visible;
+//   transition: background 0.2s ease;
+// }
+
+// .progress-fill {
+//   height: 100%;
+//   background: linear-gradient(90deg, #4f46e5, #7c3aed);
+//   border-radius: 2px;
+//   transition: width 0.1s linear, background 0.2s ease;
+//   position: relative;
+// }
+
+.progress-knob {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 12px;
+  height: 12px;
+  background: #ffffff;
+  border: 2px solid #4f46e5;
+  border-radius: 50%;
+  box-shadow: 0 0 8px rgba(79, 70, 229, 0.5);
+  cursor: grab;
+  transition: all 0.2s ease;
+  opacity: 0;
+  z-index: 10;
+
+  &.visible {
+    opacity: 1;
+  }
+
+  &.dragging {
+    cursor: grabbing;
+    transform: translate(-50%, -50%) scale(1.2);
+    box-shadow: 0 0 12px rgba(79, 70, 229, 0.8);
+  }
+}
+
+.time-display {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 6px;
+  font-size: 9px;
+  font-weight: bold;
+  color: #ffd700;
+  font-family: "Courier New", monospace;
+
+  span:nth-child(2) {
+    margin: 0 4px;
+    color: #ffd700;
+    opacity: 0.5;
   }
 }

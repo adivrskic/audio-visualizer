@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { useAudioPlayer } from "./hooks/useAudioPlayer";
 import { useWaveform } from "./hooks/useWaveform";
 import { useDraggable } from "./hooks/useDraggable";
@@ -41,6 +41,7 @@ function App() {
     play,
     pause,
     getAnalyser,
+    seek,
     cleanup: cleanupAudio,
   } = useAudioPlayer();
 
@@ -51,7 +52,7 @@ function App() {
 
   const waveform = useWaveform(analyser, isPlaying, waveSettings);
 
-  React.useEffect(() => {
+  useEffect(() => {
     setDevSettings((prev) => ({
       ...prev,
       ...(deviceType === "mobile"
@@ -59,6 +60,29 @@ function App() {
         : defaultPresets.desktop),
     }));
   }, [deviceType]);
+
+  useEffect(() => {
+    const handleSeek = (e) => {
+      if (seek) {
+        const { time, shouldPlay } = e.detail;
+        seek(time);
+
+        // If shouldPlay is true and audio is not playing, start playing
+        if (shouldPlay && !isPlaying && isReady) {
+          // Small delay to ensure seek is processed
+          setTimeout(() => {
+            play();
+          }, 50);
+        }
+      }
+    };
+
+    window.addEventListener("audioSeek", handleSeek);
+
+    return () => {
+      window.removeEventListener("audioSeek", handleSeek);
+    };
+  }, [seek, isPlaying, isReady, play]);
 
   const handleFileUpload = useCallback(
     async (file) => {

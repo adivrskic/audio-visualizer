@@ -3,27 +3,27 @@ import { AudioLines, AudioWaveform, Disc2 } from "lucide-react";
 export const presetSongs = [
   {
     id: "ambient",
-    name: "Ambient Drift",
-    filename: "ambient_drift.mp3",
+    name: "Beats",
+    filename: "beats.mp3",
     genre: "ambient",
-    description: "Atmospheric synth textures",
-    duration: "3:45",
+    description: "Atmospheric textures",
+    duration: "0:31",
   },
   {
-    id: "techno",
-    name: "Neon Grid",
-    filename: "neon_grid.mp3",
-    genre: "techno",
+    id: "trance",
+    name: "Trance",
+    filename: "trance.mp3",
+    genre: "trance",
     description: "Pulsing electronic beat",
-    duration: "4:20",
+    duration: "3:21",
   },
   {
-    id: "drum",
-    name: "Circuit Pulse",
-    filename: "circuit_pulse.mp3",
-    genre: "drum & bass",
+    id: "house",
+    name: "House",
+    filename: "house.mp3",
+    genre: "house",
     description: "Rapid-fire rhythm",
-    duration: "3:15",
+    duration: "1:35",
   },
 ];
 
@@ -37,8 +37,8 @@ export const getPresetSongPath = (filename) => {
 export const getGenreIcon = (genre) => {
   const icons = {
     ambient: <AudioLines />,
-    techno: <AudioWaveform />,
-    "drum & bass": <Disc2 />,
+    trance: <AudioWaveform />,
+    house: <Disc2 />,
   };
   return icons[genre] || "🎵";
 };
