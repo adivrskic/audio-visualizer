@@ -1,4 +1,4 @@
-// src/components/WaveformGrid.jsx
+// WaveformGrid.jsx - Fixed version
 import { useMemo, useRef, useEffect, useState } from "react";
 import * as THREE from "three";
 import { useFrame } from "@react-three/fiber";
@@ -15,7 +15,7 @@ export default function WaveformGrid({
     speed: 1.0,
     reactivity: 0.7,
     complexity: 0.5,
-    maxAmplitude: 1.0, // New control
+    maxAmplitude: 1.0,
   },
   devSettings,
 }) {
@@ -24,6 +24,10 @@ export default function WaveformGrid({
   const timeRef = useRef(0);
   const waveStartTimeRef = useRef(0);
   const initialPositionsRef = useRef(null);
+
+  // Store current positions when paused
+  const frozenPositionsRef = useRef(null);
+  const [isFrozen, setIsFrozen] = useState(false);
 
   // Store waveform history for propagation
   const waveHistoryRef = useRef([]);
@@ -148,6 +152,7 @@ export default function WaveformGrid({
       if (!activeWave) {
         waveStartTimeRef.current = timeRef.current;
         setActiveWave(true);
+        setIsFrozen(false); // Unfreeze when playing starts
       }
 
       // Analyze current waveform
@@ -175,6 +180,13 @@ export default function WaveformGrid({
       audioAnalysisRef.current.beatDetected = false;
       audioAnalysisRef.current.beatStrength = 0;
       audioAnalysisRef.current.peakAmplitude = 0;
+
+      // Freeze the waveform when not playing
+      if (!isPlaying && linesRef.current && linesRef.current.geometry) {
+        const positions = linesRef.current.geometry.attributes.position.array;
+        frozenPositionsRef.current = new Float32Array(positions);
+        setIsFrozen(true);
+      }
     }
   }, [isPlaying, waveform, activeWave]);
 
@@ -186,78 +198,94 @@ export default function WaveformGrid({
     );
   }, [horizontalLines, verticalLines, spacing]);
 
+  // Create geometry and materials - FIXED
   const { geometry, material, glowMaterial } = useMemo(() => {
-    const geometry = new THREE.BufferGeometry();
-    const vertices = [];
-    const colors = [];
+    try {
+      const geometry = new THREE.BufferGeometry();
+      const vertices = [];
+      const colors = [];
 
-    // Main color from devSettings or prop
-    const mainColorHex = devSettings?.mainColor || color;
-    const mainColor = new THREE.Color(mainColorHex);
+      // Main color from devSettings or prop
+      const mainColorHex = devSettings?.mainColor || color;
+      const mainColor = new THREE.Color(mainColorHex);
 
-    // Create a dense grid
-    for (let z = 0; z < horizontalLines; z++) {
-      const zPos = (z - horizontalLines / 2) * spacing;
-      for (let x = 0; x < verticalLines - 1; x++) {
-        const x1 = (x - verticalLines / 2) * spacing;
-        const x2 = (x + 1 - verticalLines / 2) * spacing;
+      // Create a dense grid
+      for (let z = 0; z < horizontalLines; z++) {
+        const zPos = (z - horizontalLines / 2) * spacing;
+        for (let x = 0; x < verticalLines - 1; x++) {
+          const x1 = (x - verticalLines / 2) * spacing;
+          const x2 = (x + 1 - verticalLines / 2) * spacing;
 
-        vertices.push(x1, 0, zPos);
-        vertices.push(x2, 0, zPos);
+          vertices.push(x1, 0, zPos);
+          vertices.push(x2, 0, zPos);
 
-        // Set main color
-        colors.push(mainColor.r, mainColor.g, mainColor.b);
-        colors.push(mainColor.r, mainColor.g, mainColor.b);
+          // Set main color
+          colors.push(mainColor.r, mainColor.g, mainColor.b);
+          colors.push(mainColor.r, mainColor.g, mainColor.b);
+        }
       }
-    }
 
-    // Create vertical lines
-    for (let x = 0; x < verticalLines; x++) {
-      const xPos = (x - verticalLines / 2) * spacing;
-      for (let z = 0; z < horizontalLines - 1; z++) {
-        const z1 = (z - horizontalLines / 2) * spacing;
-        const z2 = (z + 1 - horizontalLines / 2) * spacing;
+      // Create vertical lines
+      for (let x = 0; x < verticalLines; x++) {
+        const xPos = (x - verticalLines / 2) * spacing;
+        for (let z = 0; z < horizontalLines - 1; z++) {
+          const z1 = (z - horizontalLines / 2) * spacing;
+          const z2 = (z + 1 - horizontalLines / 2) * spacing;
 
-        vertices.push(xPos, 0, z1);
-        vertices.push(xPos, 0, z2);
+          vertices.push(xPos, 0, z1);
+          vertices.push(xPos, 0, z2);
 
-        // Set main color
-        colors.push(mainColor.r, mainColor.g, mainColor.b);
-        colors.push(mainColor.r, mainColor.g, mainColor.b);
+          // Set main color
+          colors.push(mainColor.r, mainColor.g, mainColor.b);
+          colors.push(mainColor.r, mainColor.g, mainColor.b);
+        }
       }
+
+      geometry.setAttribute(
+        "position",
+        new THREE.Float32BufferAttribute(vertices, 3)
+      );
+      geometry.setAttribute(
+        "color",
+        new THREE.Float32BufferAttribute(colors, 3)
+      );
+
+      const indices = [];
+      for (let i = 0; i < vertices.length / 3; i += 2) {
+        indices.push(i, i + 1);
+      }
+      geometry.setIndex(new THREE.BufferAttribute(new Uint16Array(indices), 1));
+
+      // Materials - with enhanced properties
+      const material = new THREE.LineBasicMaterial({
+        vertexColors: true,
+        transparent: true,
+        opacity: opacity,
+        toneMapped: true,
+        linewidth: 1,
+      });
+
+      const glowMaterial = new THREE.LineBasicMaterial({
+        vertexColors: true,
+        transparent: true,
+        opacity: opacity * (devSettings?.glowIntensity || 0.5),
+        toneMapped: true,
+        blending: THREE.AdditiveBlending,
+        linewidth: 2,
+      });
+
+      return { geometry, material, glowMaterial };
+    } catch (error) {
+      console.error("Error creating geometry:", error);
+      // Return fallback objects to prevent crash
+      const fallbackGeometry = new THREE.BufferGeometry();
+      const fallbackMaterial = new THREE.LineBasicMaterial({ color: 0xff0000 });
+      return {
+        geometry: fallbackGeometry,
+        material: fallbackMaterial,
+        glowMaterial: fallbackMaterial,
+      };
     }
-
-    geometry.setAttribute(
-      "position",
-      new THREE.Float32BufferAttribute(vertices, 3)
-    );
-    geometry.setAttribute("color", new THREE.Float32BufferAttribute(colors, 3));
-
-    const indices = [];
-    for (let i = 0; i < vertices.length / 3; i += 2) {
-      indices.push(i, i + 1);
-    }
-    geometry.setIndex(new THREE.BufferAttribute(new Uint16Array(indices), 1));
-
-    // Materials - with enhanced properties
-    const material = new THREE.LineBasicMaterial({
-      vertexColors: true,
-      transparent: true,
-      opacity: opacity,
-      toneMapped: true,
-      linewidth: 1,
-    });
-
-    const glowMaterial = new THREE.LineBasicMaterial({
-      vertexColors: true,
-      transparent: true,
-      opacity: opacity * (devSettings?.glowIntensity || 0.5),
-      toneMapped: true,
-      blending: THREE.AdditiveBlending,
-      linewidth: 2,
-    });
-
-    return { geometry, material, glowMaterial };
   }, [color, opacity, devSettings, horizontalLines, verticalLines, spacing]);
 
   // Store initial positions
@@ -272,13 +300,14 @@ export default function WaveformGrid({
   // Update colors with more dynamic variations
   useFrame(() => {
     if (!linesRef.current) return;
+    if (!linesRef.current.geometry || !linesRef.current.geometry.attributes)
+      return;
     if (!linesRef.current.geometry.attributes.color) return;
 
     // For mirrored version, use gray color
     const isMirroredReflection = isMirrored && color === "#666666";
 
     if (isMirroredReflection) {
-      // Mirror uses gray color with subtle variations
       const colors = linesRef.current.geometry.attributes.color.array;
       const grayColor = new THREE.Color(0x666666);
       const totalColors = colors.length / 3;
@@ -296,9 +325,10 @@ export default function WaveformGrid({
         );
         const brightness = 0.4 + 0.2 * (1 - normalizedDistance);
 
-        // Add subtle time-based variation
-        const timeVariation =
-          0.95 + 0.05 * Math.sin(timeRef.current * 0.3 + x * 0.5 + z * 0.5);
+        // Add subtle time-based variation (only when playing)
+        const timeVariation = isPlaying
+          ? 0.95 + 0.05 * Math.sin(timeRef.current * 0.3 + x * 0.5 + z * 0.5)
+          : 0.95;
 
         colors[baseIndex] = grayColor.r * brightness * timeVariation;
         colors[baseIndex + 1] = grayColor.g * brightness * timeVariation;
@@ -309,85 +339,89 @@ export default function WaveformGrid({
       return;
     }
 
-    // For main grid: dynamic color variations
-    const colors = linesRef.current.geometry.attributes.color.array;
-    const mainColorHex = devSettings?.mainColor || color;
-    const mainColor = new THREE.Color(mainColorHex);
+    // For main grid: dynamic color variations (only update when playing)
+    if (isPlaying) {
+      const colors = linesRef.current.geometry.attributes.color.array;
+      const mainColorHex = devSettings?.mainColor || color;
+      const mainColor = new THREE.Color(mainColorHex);
 
-    const totalColors = colors.length / 3;
-    const { bassIntensity, midIntensity, trebleIntensity, peakAmplitude } =
-      audioAnalysisRef.current;
-    const { beatStrength } = audioAnalysisRef.current;
-    const beatPulse = beatStrength;
+      const totalColors = colors.length / 3;
+      const { bassIntensity, midIntensity, trebleIntensity, peakAmplitude } =
+        audioAnalysisRef.current;
+      const { beatStrength } = audioAnalysisRef.current;
+      const beatPulse = beatStrength;
 
-    // Calculate overall energy level
-    const energyLevel = Math.min(
-      1,
-      ((bassIntensity + midIntensity + trebleIntensity) / 3) * 1.5
-    );
+      // Calculate overall energy level
+      const energyLevel = Math.min(
+        1,
+        ((bassIntensity + midIntensity + trebleIntensity) / 3) * 1.5
+      );
 
-    for (let i = 0; i < totalColors; i++) {
-      const baseIndex = i * 3;
-      const x = initialPositionsRef.current?.[baseIndex] || 0;
-      const z = initialPositionsRef.current?.[baseIndex + 2] || 0;
+      for (let i = 0; i < totalColors; i++) {
+        const baseIndex = i * 3;
+        const x = initialPositionsRef.current?.[baseIndex] || 0;
+        const z = initialPositionsRef.current?.[baseIndex + 2] || 0;
 
-      // Calculate distance from center
-      const distanceFromCenter = Math.sqrt(x * x + z * z);
-      const normalizedDistance = Math.min(1, distanceFromCenter / maxDistance);
+        // Calculate distance from center
+        const distanceFromCenter = Math.sqrt(x * x + z * z);
+        const normalizedDistance = Math.min(
+          1,
+          distanceFromCenter / maxDistance
+        );
 
-      // Base brightness with distance falloff
-      let brightness = 0.7 + 0.3 * (1 - normalizedDistance);
+        // Base brightness with distance falloff
+        let brightness = 0.7 + 0.3 * (1 - normalizedDistance);
 
-      // Energy-based brightness boost
-      brightness *= 1 + energyLevel * 0.3;
+        // Energy-based brightness boost (only when playing)
+        brightness *= 1 + energyLevel * 0.3;
 
-      // Frequency response brightness variations
-      if (normalizedDistance < 0.3) {
-        brightness *= 1 + bassIntensity * 0.4; // Strong bass response in center
-      } else if (normalizedDistance < 0.7) {
-        brightness *= 1 + midIntensity * 0.2; // Moderate mid response
-      } else {
-        brightness *= 1 + trebleIntensity * 0.1; // Subtle treble response
+        // Frequency response brightness variations
+        if (normalizedDistance < 0.3) {
+          brightness *= 1 + bassIntensity * 0.4;
+        } else if (normalizedDistance < 0.7) {
+          brightness *= 1 + midIntensity * 0.2;
+        } else {
+          brightness *= 1 + trebleIntensity * 0.1;
+        }
+
+        // Beat pulse effect
+        brightness *= 1 + beatPulse * 0.5;
+
+        // Peak amplitude effect
+        const peakEffect = Math.min(1, peakAmplitude * 2);
+        brightness *= 1 + peakEffect * 0.2;
+
+        // Add complex noise for organic feel
+        const noiseX = Math.sin(x * 3 + timeRef.current * 1.2) * 0.1;
+        const noiseZ = Math.cos(z * 3 + timeRef.current * 0.8) * 0.1;
+        const noise = 0.9 + (noiseX + noiseZ) * 0.1;
+        brightness *= noise;
+
+        // Complexity setting affects color saturation
+        const saturationBoost = 1.0 + waveSettings.complexity * 0.3;
+
+        // Create color with saturation boost
+        const color = mainColor.clone();
+        if (saturationBoost > 1.0) {
+          color.multiplyScalar(saturationBoost);
+        }
+
+        colors[baseIndex] = color.r * brightness;
+        colors[baseIndex + 1] = color.g * brightness;
+        colors[baseIndex + 2] = color.b * brightness;
       }
 
-      // Beat pulse effect - more dramatic
-      brightness *= 1 + beatPulse * 0.5;
+      linesRef.current.geometry.attributes.color.needsUpdate = true;
 
-      // Peak amplitude effect - extra brightness on peaks
-      const peakEffect = Math.min(1, peakAmplitude * 2);
-      brightness *= 1 + peakEffect * 0.2;
-
-      // Add complex noise for organic feel
-      const noiseX = Math.sin(x * 3 + timeRef.current * 1.2) * 0.1;
-      const noiseZ = Math.cos(z * 3 + timeRef.current * 0.8) * 0.1;
-      const noise = 0.9 + (noiseX + noiseZ) * 0.1;
-      brightness *= noise;
-
-      // Complexity setting affects color saturation
-      const saturationBoost = 1.0 + waveSettings.complexity * 0.3;
-
-      // Create color with saturation boost
-      const color = mainColor.clone();
-      if (saturationBoost > 1.0) {
-        color.multiplyScalar(saturationBoost);
+      // Update glow lines
+      if (glowLinesRef.current && glowLinesRef.current.geometry) {
+        const glowColors = glowLinesRef.current.geometry.attributes.color.array;
+        const glowBoost = 1.2 + energyLevel * 0.3;
+        for (let i = 0; i < colors.length; i++) {
+          glowColors[i] = Math.min(1, colors[i] * glowBoost);
+        }
+        glowLinesRef.current.geometry.attributes.color.needsUpdate = true;
       }
-
-      colors[baseIndex] = color.r * brightness;
-      colors[baseIndex + 1] = color.g * brightness;
-      colors[baseIndex + 2] = color.b * brightness;
-    }
-
-    linesRef.current.geometry.attributes.color.needsUpdate = true;
-
-    // Update glow lines with enhanced effects
-    if (glowLinesRef.current && glowLinesRef.current.geometry) {
-      const glowColors = glowLinesRef.current.geometry.attributes.color.array;
-      // Make glow colors slightly brighter and more saturated
-      const glowBoost = 1.2 + energyLevel * 0.3;
-      for (let i = 0; i < colors.length; i++) {
-        glowColors[i] = Math.min(1, colors[i] * glowBoost);
-      }
-      glowLinesRef.current.geometry.attributes.color.needsUpdate = true;
     }
   });
 
@@ -402,7 +436,42 @@ export default function WaveformGrid({
     const initialPositions = initialPositionsRef.current;
     const totalVertices = positions.length / 3;
 
-    // Base settings with waveSettings multipliers
+    // If frozen, restore frozen positions and return
+    if (isFrozen && frozenPositionsRef.current) {
+      // Check if we need to restore frozen positions
+      if (positions.length > 2 && frozenPositionsRef.current.length > 2) {
+        const currentY = positions[2]; // Check first Y position
+        const frozenY = frozenPositionsRef.current[2];
+
+        if (Math.abs(currentY - frozenY) > 0.001) {
+          // Restore frozen positions
+          for (
+            let i = 0;
+            i < Math.min(positions.length, frozenPositionsRef.current.length);
+            i++
+          ) {
+            positions[i] = frozenPositionsRef.current[i];
+          }
+          linesRef.current.geometry.attributes.position.needsUpdate = true;
+
+          if (glowLinesRef.current && glowLinesRef.current.geometry) {
+            const glowPositions =
+              glowLinesRef.current.geometry.attributes.position.array;
+            for (
+              let i = 0;
+              i < Math.min(glowPositions.length, positions.length);
+              i++
+            ) {
+              glowPositions[i] = positions[i];
+            }
+            glowLinesRef.current.geometry.attributes.position.needsUpdate = true;
+          }
+        }
+      }
+      return; // Skip all animation when frozen
+    }
+
+    // Base settings
     const baseHeightScale = devSettings?.baseHeightScale || 2.5;
     const maxAmplitude = waveSettings.maxAmplitude || 1.0;
     const intensity = waveSettings.intensity || 0.5;
@@ -410,11 +479,13 @@ export default function WaveformGrid({
     const complexity = waveSettings.complexity || 0.5;
     const speed = waveSettings.speed || 1.0;
 
-    // Combined height scale with all multipliers
+    // Combined height scale
     const heightScale = baseHeightScale * intensity * maxAmplitude * 2.0;
 
-    // Update time with speed multiplier
-    timeRef.current += delta * speed;
+    // Update time with speed multiplier (only when playing)
+    if (isPlaying) {
+      timeRef.current += delta * speed;
+    }
 
     // Get current analysis data
     const {
@@ -426,82 +497,44 @@ export default function WaveformGrid({
     } = audioAnalysisRef.current;
     const { beatDetected, beatStrength } = audioAnalysisRef.current;
 
-    // Enhanced beat multiplier with maxAmplitude
+    // Enhanced beat multiplier
     const beatMultiplier = 1.0 + beatStrength * (0.8 + maxAmplitude * 0.7);
 
-    // When NOT playing - return to flat with interesting idle animation
+    // When NOT playing - stay frozen
     if (!isPlaying || !activeWave) {
-      let needsUpdate = false;
-      const returnSpeed = 0.08 + reactivity * 0.07; // Reactivity affects return speed
-
-      // Interesting idle animation that uses complexity setting
-      const idleWave =
-        Math.sin(timeRef.current * (0.3 + complexity * 0.4)) *
-        (0.05 + complexity * 0.05) *
-        maxAmplitude;
-
-      for (let i = 0; i < totalVertices; i++) {
-        const baseIndex = i * 3;
-        const x = initialPositions[baseIndex];
-        const z = initialPositions[baseIndex + 2];
-        const currentY = positions[baseIndex + 1];
-
-        // Calculate distance from center
-        const distanceFromCenter = Math.sqrt(x * x + z * z);
-        const normalizedDistance = Math.min(
-          1,
-          distanceFromCenter / maxDistance
-        );
-
-        // Target Y position with complexity-based pattern
-        let targetY = idleWave * (1 - normalizedDistance);
-
-        // Add subtle pattern based on position
-        const patternX =
-          Math.sin(x * (1 + complexity * 2) + timeRef.current * 0.2) *
-          0.02 *
-          complexity;
-        const patternZ =
-          Math.cos(z * (1 + complexity * 2) + timeRef.current * 0.15) *
-          0.02 *
-          complexity;
-        targetY +=
-          (patternX + patternZ) * (1 - normalizedDistance) * maxAmplitude;
-
-        // If currently above/below target, slowly return
-        if (Math.abs(currentY - targetY) > 0.001) {
-          positions[baseIndex + 1] =
-            currentY * (1 - returnSpeed) + targetY * returnSpeed;
-          needsUpdate = true;
-        } else {
-          positions[baseIndex + 1] = targetY;
+      // If we have frozen positions, use them
+      if (frozenPositionsRef.current) {
+        for (
+          let i = 0;
+          i < Math.min(positions.length, frozenPositionsRef.current.length);
+          i++
+        ) {
+          positions[i] = frozenPositionsRef.current[i];
         }
-
-        positions[baseIndex] = initialPositions[baseIndex];
-        positions[baseIndex + 2] = initialPositions[baseIndex + 2];
-      }
-
-      if (needsUpdate) {
         linesRef.current.geometry.attributes.position.needsUpdate = true;
-        if (glowLinesRef.current) {
+
+        if (glowLinesRef.current && glowLinesRef.current.geometry) {
+          const glowPositions =
+            glowLinesRef.current.geometry.attributes.position.array;
+          for (
+            let i = 0;
+            i < Math.min(glowPositions.length, positions.length);
+            i++
+          ) {
+            glowPositions[i] = positions[i];
+          }
           glowLinesRef.current.geometry.attributes.position.needsUpdate = true;
         }
       }
-
-      // Clear history when not playing
-      if (!isPlaying) {
-        waveHistoryRef.current = [];
-      }
-
       return;
     }
 
-    // When PLAYING - enhanced wave propagation with all settings active
+    // When PLAYING - wave propagation
     const time = timeRef.current;
     const timeSinceWaveStart = time - waveStartTimeRef.current;
     const waveformLength = waveform.length;
 
-    // Enhanced frequency strengths with reactivity multiplier
+    // Enhanced frequency strengths
     const bassStrength = Math.min(1, bassIntensity * (2 + reactivity));
     const midStrength = Math.min(1, midIntensity * (1.5 + reactivity * 0.5));
     const trebleStrength = Math.min(
@@ -509,7 +542,7 @@ export default function WaveformGrid({
       trebleIntensity * (1.2 + reactivity * 0.3)
     );
 
-    // Peak amplitude effect - extra boost on loud parts
+    // Peak amplitude effect
     const peakEffect = Math.min(2, peakAmplitude * 3) * maxAmplitude;
 
     for (let i = 0; i < totalVertices; i++) {
@@ -521,17 +554,17 @@ export default function WaveformGrid({
       const distanceFromCenter = Math.sqrt(x * x + z * z);
       const normalizedDistance = Math.min(1, distanceFromCenter / maxDistance);
 
-      // Wave propagation timing - complexity affects timing patterns
+      // Wave propagation timing
       let wavePropagationSpeed = devSettings?.wavePropagationSpeed || 4.0;
-      wavePropagationSpeed *= 1 + complexity * 0.5; // Complexity makes timing more varied
+      wavePropagationSpeed *= 1 + complexity * 0.5;
 
       // Different speeds for different frequencies
       if (normalizedDistance < 0.3) {
-        wavePropagationSpeed *= 0.7 + bassStrength * 0.6; // Bass waves are slower
+        wavePropagationSpeed *= 0.7 + bassStrength * 0.6;
       } else if (normalizedDistance < 0.7) {
-        wavePropagationSpeed *= 0.9 + midStrength * 0.4; // Mid waves are moderate
+        wavePropagationSpeed *= 0.9 + midStrength * 0.4;
       } else {
-        wavePropagationSpeed *= 1.1 + trebleStrength * 0.5; // Treble waves are faster
+        wavePropagationSpeed *= 1.1 + trebleStrength * 0.5;
       }
 
       const waveArrivalTime = normalizedDistance * wavePropagationSpeed;
@@ -554,7 +587,7 @@ export default function WaveformGrid({
           }
         }
 
-        // Get waveform value with reactivity enhancement
+        // Get waveform value
         const waveformIndex = Math.min(
           waveformLength - 1,
           Math.floor(
@@ -564,27 +597,24 @@ export default function WaveformGrid({
 
         let waveValue = closestEntry.waveform[waveformIndex] || 0;
 
-        // Apply reactivity curve - makes response more dynamic
+        // Apply reactivity curve
         const reactivityCurve = Math.pow(waveValue, 2 - reactivity);
         waveValue = reactivityCurve;
 
-        // Enhanced frequency-based response with all settings
+        // Frequency-based response
         if (normalizedDistance < 0.3) {
-          // Center responds strongly to bass
           const bassResponse = devSettings?.bassCenterFactor || 1.2;
           frequencyMultiplier =
             bassStrength * bassResponse * (2.5 - normalizedDistance * 2);
-          frequencyMultiplier *= 1 + intensity * 0.5; // Intensity affects bass response
+          frequencyMultiplier *= 1 + intensity * 0.5;
         } else if (normalizedDistance < 0.7) {
-          // Middle responds to mids
           frequencyMultiplier = midStrength * 1.0;
-          frequencyMultiplier *= 1 + complexity * 0.3; // Complexity affects mid detail
+          frequencyMultiplier *= 1 + complexity * 0.3;
         } else {
-          // Edges respond to treble
           const trebleResponse = devSettings?.highEdgeFactor || 1.2;
           frequencyMultiplier =
             trebleStrength * trebleResponse * normalizedDistance;
-          frequencyMultiplier *= 1 + maxAmplitude * 0.2; // Max amplitude affects treble
+          frequencyMultiplier *= 1 + maxAmplitude * 0.2;
         }
 
         // Base height with all multipliers
@@ -594,8 +624,8 @@ export default function WaveformGrid({
         // Apply peak effect boost
         baseHeight *= 1 + peakEffect * 0.3;
 
-        // Multi-layered ripple effects with complexity control
-        const rippleCount = Math.floor(2 + complexity * 3); // More ripples with higher complexity
+        // Multi-layered ripple effects
+        const rippleCount = Math.floor(2 + complexity * 3);
         let rippleHeight = 0;
 
         for (let r = 0; r < rippleCount; r++) {
@@ -620,7 +650,7 @@ export default function WaveformGrid({
         rippleHeight *= maxAmplitude;
         height = baseHeight + rippleHeight;
 
-        // Enhanced organic movement with complexity layers
+        // Enhanced organic movement
         const organicLayers = Math.floor(1 + complexity * 2);
         let organicHeight = 0;
 
@@ -648,7 +678,7 @@ export default function WaveformGrid({
         organicHeight *= intensity * maxAmplitude;
         height += organicHeight;
 
-        // Complex noise patterns with reactivity control
+        // Complex noise patterns
         const noiseScale = 0.15 + reactivity * 0.1;
         const noiseFreq = 1.5 + complexity * 1.5;
         const noiseHeight =
@@ -661,7 +691,7 @@ export default function WaveformGrid({
 
         height += noiseHeight * maxAmplitude;
 
-        // Beat impact - creates sharper movements on beats
+        // Beat impact
         if (beatDetected) {
           const beatFrequency = 25 + beatStrength * 15;
           const beatImpact =
@@ -674,7 +704,7 @@ export default function WaveformGrid({
           height += beatImpact;
         }
 
-        // Apply center falloff with smooth curve
+        // Apply center falloff
         const centerFalloff = devSettings?.centerFalloff || 0.25;
         const falloffCurve = Math.pow(
           1 - normalizedDistance,
@@ -682,25 +712,17 @@ export default function WaveformGrid({
         );
         height *= 1 - normalizedDistance * centerFalloff * falloffCurve;
 
-        // Final amplitude limit with maxAmplitude
+        // Final amplitude limit
         const amplitudeLimit = 5.0 * maxAmplitude;
         height = Math.max(-amplitudeLimit, Math.min(amplitudeLimit, height));
       }
 
-      // Mirror effect with enhanced settings
+      // Mirror effect
       if (isMirrored) {
         const mirrorIntensity = 0.6 + intensity * 0.4;
         height = -height * mirrorIntensity;
 
-        // Add subtle phase shift to mirror
-        const phaseShift =
-          Math.sin(time * (0.4 + complexity * 0.2)) *
-          0.15 *
-          normalizedDistance *
-          maxAmplitude;
-        height += phaseShift;
-
-        // Blur effect with intensity control
+        // Blur effect
         if (blurAmount > 0) {
           const blurIntensity =
             blurAmount * (1 + overallIntensity * 0.5) * intensity;
@@ -716,7 +738,7 @@ export default function WaveformGrid({
 
     linesRef.current.geometry.attributes.position.needsUpdate = true;
 
-    // Update glow lines with enhanced exaggeration
+    // Update glow lines
     if (
       devSettings?.glowEnabled !== false &&
       glowLinesRef.current &&
@@ -725,12 +747,10 @@ export default function WaveformGrid({
       const glowPositions =
         glowLinesRef.current.geometry.attributes.position.array;
 
-      // Glow exaggeration based on intensity and maxAmplitude
       const glowBoost = 1.1 + intensity * 0.3 + maxAmplitude * 0.2;
 
       for (let i = 0; i < positions.length; i++) {
         if (i % 3 === 1) {
-          // Y positions only
           glowPositions[i] = positions[i] * glowBoost;
         } else {
           glowPositions[i] = positions[i];
@@ -739,6 +759,11 @@ export default function WaveformGrid({
       glowLinesRef.current.geometry.attributes.position.needsUpdate = true;
     }
   });
+
+  // Check if geometry exists before rendering
+  if (!geometry || !material) {
+    return null; // Don't render if geometry failed
+  }
 
   return (
     <group>

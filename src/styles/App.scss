@@ -502,7 +502,6 @@ body,
 .webgl-error-content .retry-button:hover {
   background: rgba(255, 107, 107, 0.25);
   border-color: rgba(255, 107, 107, 0.5);
-  transform: translateY(-1px);
 }
 
 .webgl-error-content .learn-more-button {
@@ -1076,7 +1075,6 @@ body,
 .preset-song-btn:hover:not(:disabled) {
   background: rgba(255, 215, 0, 0.05);
   border-color: rgba(255, 215, 0, 0.3);
-  transform: translateY(-1px);
 }
 
 .preset-song-btn:active:not(:disabled) {
@@ -1264,7 +1262,7 @@ body,
   color: rgba(255, 215, 0, 0.7);
   padding: 1px 6px;
   border-radius: 3px;
-  font-size: 8px;
+  font-size: 7px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   border: 1px solid rgba(255, 215, 0, 0.2);
@@ -1323,7 +1321,7 @@ body,
   }
 
   .device-tag {
-    display: none; /* Hide on mobile to save space */
+    // display: none; /* Hide on mobile to save space */
   }
 }
 // Add these styles to your existing App.scss
@@ -1334,23 +1332,6 @@ body,
     }
   }
 }
-
-// .progress-bar {
-//   position: relative;
-//   height: 4px;
-//   background: rgba(255, 255, 255, 0.1);
-//   border-radius: 2px;
-//   overflow: visible;
-//   transition: background 0.2s ease;
-// }
-
-// .progress-fill {
-//   height: 100%;
-//   background: linear-gradient(90deg, #4f46e5, #7c3aed);
-//   border-radius: 2px;
-//   transition: width 0.1s linear, background 0.2s ease;
-//   position: relative;
-// }
 
 .progress-knob {
   position: absolute;
