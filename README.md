@@ -1,70 +1,130 @@
-# Getting Started with Create React App
+# Audio Visualizer
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+[![GitHub stars](https://img.shields.io/github/stars/adivrskic/audio-visualizer?style=flat-square)](https://github.com/adivrskic/audio-visualizer/stargazers)
+[![GitHub forks](https://img.shields.io/github/forks/adivrskic/audio-visualizer?style=flat-square)](https://github.com/adivrskic/audio-visualizer/network)
+[![License](https://img.shields.io/github/license/adivrskic/audio-visualizer?style=flat-square)](LICENSE)
+[![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=flat-square&logo=javascript&logoColor=black)](https://github.com/adivrskic/audio-visualizer)
+[![SCSS](https://img.shields.io/badge/SCSS-CC6699?style=flat-square&logo=sass&logoColor=white)](https://github.com/adivrskic/audio-visualizer)
+[![React](https://img.shields.io/badge/React-61DAFB?style=flat-square&logo=react&logoColor=black)](https://github.com/adivrskic/audio-visualizer)
 
-## Available Scripts
+## Features
 
-In the project directory, you can run:
+- **3D Audio Visualization**: Real-time 3D visualization of audio frequency data using Three.js
+- **Interactive Controls**: User-friendly interface with play/pause, volume control, and visualization settings
+- **Post-Processing Effects**: Advanced visual effects powered by React Three Postprocessing
+- **Multiple Visualization Modes**: Various visualization styles and patterns to enhance the audio experience
+- **Screenshot Capability**: Export visualizations as images using html2canvas
+- **Responsive Design**: Optimized for different screen sizes and devices
+- **Modern UI**: Clean interface with Lucide React icons
 
-### `npm start`
+## Installation
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+1. Clone the repository:
+```bash
+git clone https://github.com/adivrskic/audio-visualizer.git
+cd audio-visualizer
+```
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+2. Install dependencies:
+```bash
+npm install
+```
 
-### `npm test`
+3. Start the development server:
+```bash
+npm start
+```
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+The application will open in your browser at `http://localhost:3000`.
 
-### `npm run build`
+## Usage
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+### Basic Usage
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+```javascript
+// Start the visualizer with an audio file
+const audioFile = new File(['audio-data'], 'song.mp3', { type: 'audio/mp3' });
+visualizer.loadAudio(audioFile);
+visualizer.play();
+```
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+### Taking Screenshots
 
-### `npm run eject`
+```javascript
+import html2canvas from 'html2canvas';
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+// Capture the current visualization
+const captureVisualization = () => {
+  const canvas = document.querySelector('canvas');
+  html2canvas(canvas).then(canvas => {
+    const link = document.createElement('a');
+    link.download = 'visualization.png';
+    link.href = canvas.toDataURL();
+    link.click();
+  });
+};
+```
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+### Custom Visualization Settings
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+```javascript
+// Configure visualization parameters
+const visualizationConfig = {
+  fftSize: 2048,
+  smoothingTimeConstant: 0.8,
+  minDecibels: -90,
+  maxDecibels: -10
+};
+```
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+## Tech Stack
 
-## Learn More
+### Core Dependencies
+- **React** (^18.2.0) - UI framework
+- **Three.js** (^0.182.0) - 3D graphics library
+- **@react-three/fiber** (^8.15.24) - React renderer for Three.js
+- **@react-three/drei** (^9.101.3) - Useful helpers for React Three Fiber
+- **@react-three/postprocessing** (^2.19.1) - Post-processing effects
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+### Additional Libraries
+- **postprocessing** (^6.38.0) - Post-processing library for Three.js
+- **html2canvas** (^1.4.1) - Screenshot functionality
+- **lucide-react** (^0.344.0) - Modern icon library
+- **sass** (^1.96.0) - CSS preprocessor
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+### Development Tools
+- **react-scripts** (5.0.1) - Build tools and configuration
 
-### Code Splitting
+## Contributing
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+We welcome contributions to the Audio Visualizer project! Here's how you can help:
 
-### Analyzing the Bundle Size
+### Getting Started
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature/amazing-feature`
+3. Commit your changes: `git commit -m 'Add some amazing feature'`
+4. Push to the branch: `git push origin feature/amazing-feature`
+5. Open a Pull Request
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+### Development Guidelines
+- Follow the existing code style and conventions
+- Write clear, descriptive commit messages
+- Test your changes thoroughly before submitting
+- Update documentation as needed
+- Ensure all tests pass: `npm test`
 
-### Making a Progressive Web App
+### Reporting Issues
+- Use the GitHub Issues tab to report bugs or request features
+- Provide detailed information about the issue
+- Include steps to reproduce the problem
+- Specify your browser and operating system
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+### Code Style
+- Use ES6+ JavaScript features
+- Follow React best practices and hooks patterns
+- Use meaningful variable and function names
+- Comment complex logic and algorithms
 
-### Advanced Configuration
+## License
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+This project is currently unlicensed. Please contact the repository owner for information about usage rights and permissions.
